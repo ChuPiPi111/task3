@@ -1,0 +1,72 @@
+#!/usr/bin/env python3.12
+
+#Task 1.
+#Task 2.
+
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import redis
+
+app = FastAPI()
+
+# Redis 客戶端
+redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
+
+# SQLAlchemy 設定
+DATABASE_URL = "sqlite:///./test.db"
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# 定義主機
+class Host(Base):
+    __tablename__ = "hosts"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+
+Base.metadata.create_all(bind=engine)
+
+# 定義 Pydantic 模型
+class HostCreate(BaseModel):
+    name: str
+
+# CRUD
+@app.post("/hosts/")
+def create_host(host: HostCreate):
+    db = SessionLocal()
+    db_host = Host(name=host.name)
+    db.add(db_host)
+    db.commit()
+    db.refresh(db_host)
+    db.close()
+    
+    # 緩存到 Redis
+    redis_client.set(f"host:{db_host.id}", host.name)
+    return db_host
+
+@app.get("/hosts/{host_id}")
+def read_host(host_id: int):
+    # 從 Redis 讀取
+    cached_host = redis_client.get(f"host:{host_id}")
+    if cached_host:
+        return {"id": host_id, "name": cached_host.decode('utf-8')}
+    
+    # 如果 Redis 中不存在，從 DB 讀取
+    db = SessionLocal()
+    db_host = db.query(Host).filter(Host.id == host_id).first()
+    db.close()
+    
+    if db_host:
+        # 儲存到 Redis
+        redis_client.set(f"host:{db_host.id}", db_host.name)
+        return {"id": db_host.id, "name": db_host.name}
+    else:
+        raise HTTPException(status_code=404, detail="Host not found")
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}

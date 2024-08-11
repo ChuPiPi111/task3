@@ -1,0 +1,36 @@
+services:
+  server:
+    # task2延續task1繼續
+    image: task1
+
+    # 容器的名稱一樣
+    container_name: task1
+
+    build:
+      context: .
+
+    ports:
+      - "80:80"
+
+    # 依賴redis服務並確保redis先啟動
+    depends_on:
+      - redis
+      - postgres
+
+  # 定義 Redis
+  redis:
+    # 使用最新版本
+    image: "redis:latest"
+
+    ports:
+      - "6379:6379"
+
+  # 定義 Postgres
+  postgres:
+    image: "postgres:latest"
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
