@@ -3,45 +3,37 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - main  
   pull_request:
     branches:
-      - main
-
+      - main  
 jobs:
-  lint:
-    runs-on: ubuntu-latest
+  linting:
+    runs-on: ubuntu-latest  # 使用最新版本的 Runner
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-        # 檢測出 GitHub 上的代碼到工作環境中
+        uses: actions/checkout@v3  # 檢出代碼到runner
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
-        # 設定 Python 環境版本
+          python-version: '3.12'  
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install poetry
-          poetry install
-        # 安裝 Poetry 並安裝專案中的依賴
+          poetry install --no-dev  # 安裝專案的依賴
 
       - name: Run isort
-        run: poetry run isort --check-only .
-        # 檢查代碼格式是否符合 isort 規範
+        run: poetry run isort --check-only .  # 檢查 import 排序是否正確
 
       - name: Run black
-        run: poetry run black --check .
-        # 檢查代碼格式是否符合 black 規範
+        run: poetry run black --check .  # 檢查代碼格式是否符合 black 標準
 
       - name: Run pylint
-        run: poetry run pylint fastapi_project
-        # 執行 pylint 進行代碼靜態分析
+        run: poetry run pylint src  # 檢查代碼質量 (假設源碼在 src 目錄)
 
       - name: Run mypy
-        run: poetry run mypy fastapi_project
-        # 執行 mypy 進行靜態類型檢查
+        run: poetry run mypy src  # 檢查類型註解 (假設源碼在 src 目錄)
