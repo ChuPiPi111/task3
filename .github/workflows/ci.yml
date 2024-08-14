@@ -35,7 +35,7 @@ jobs:
         run: poetry run black --check .  # 檢查代碼格式是否符合 black 標準
 
       - name: Run pylint
-        run: poetry run pylint src  # 檢查代碼質量 (假設源碼在 src 目錄)
+        run: poetry run pylint   # 檢查代碼質量 (假設源碼在 src 目錄)
 
       - name: Run mypy
-        run: poetry run mypy src  # 檢查類型註解 (假設源碼在 src 目錄)
+        run: poetry run mypy   # 檢查類型註解 (假設源碼在 src 目錄)
