@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        # 檢測出 GitHub 上的代碼到工作環境中
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+        # 設定 Python 環境版本
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install
+        # 安裝 Poetry 並安裝專案中的依賴
+
+      - name: Run isort
+        run: poetry run isort --check-only .
+        # 檢查代碼格式是否符合 isort 規範
+
+      - name: Run black
+        run: poetry run black --check .
+        # 檢查代碼格式是否符合 black 規範
+
+      - name: Run pylint
+        run: poetry run pylint fastapi_project
+        # 執行 pylint 進行代碼靜態分析
+
+      - name: Run mypy
+        run: poetry run mypy fastapi_project
+        # 執行 mypy 進行靜態類型檢查
