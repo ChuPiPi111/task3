@@ -1,13 +1,14 @@
 #!/usr/bin/env python3.12
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-import redis
 import json
 from datetime import datetime
+
+import redis
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from sqlalchemy import Column, DateTime, Integer, String, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 app = FastAPI()
 
