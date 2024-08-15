@@ -1,0 +1,8 @@
+[MASTER]
+# 輸出格式設置為文本
+output-format = text
+
+[MESSAGES CONTROL]
+# 禁用以下警告
+disable=
+    R0903  # Too few public methods，查詢是因為 Host 類別被認為公開方法太少。pylint 通常對於類別有兩個或以上的方法會更寬容。這邊所則忽略此警告
